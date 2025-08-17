@@ -107,7 +107,11 @@ export const ManageInfo = async (req: Request, res: Response) => {
         RETURNING *;
       `;
 
-            let HomeImage, AboutImage, Resume
+            let HomeImage = data?.homeimage || ""
+            
+            let AboutImage = data?.aboutimage || ""
+            
+            let Resume = data?.resume || ""
 
 
             if ((req as any).files) {

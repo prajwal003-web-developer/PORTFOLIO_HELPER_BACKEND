@@ -41,7 +41,7 @@ app.use(express.json())
 // Routes
 
 // Default route
-app.get('/awake ', (req: Request, res: Response) => {
+app.get('/awake', (req: Request, res: Response) => {
     res.send('Hello TypeScript + Express!')
 })
 

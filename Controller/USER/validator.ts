@@ -5,3 +5,7 @@ export const userSchemaRegister  =  z.object({
     Password:z.string().min(8,'Password Should be of Min 8 character'),
     Email:z.string().email()
 })
+export const userSchemaLogin  =  z.object({
+    Password:z.string().min(8,'Password Should be of Min 8 character'),
+    Email:z.string().email()
+})

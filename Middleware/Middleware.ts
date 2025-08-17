@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import { ThrowError } from "../utils/Error";
 import jwt from "jsonwebtoken";
 
-interface JwtPayload {
+export interface JwtPayload {
     id: Number; // user id stored in token
 }
 

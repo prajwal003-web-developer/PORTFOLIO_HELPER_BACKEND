@@ -19,6 +19,6 @@ router.post("/verify-email",verify)
 router.get('/me',AuthorizeUser,me) 
 
 router.get('/send-email-forget-password/:email',ForgotPasswordRequest)
-router.post('/verify-email-request/:Token',ChangePassword)
+router.post('/change-password/:Token',ChangePassword)
 
 export default router;

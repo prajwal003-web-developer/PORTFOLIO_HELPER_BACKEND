@@ -40,8 +40,15 @@ export const dataByOthers = async (req: Request, res: Response) => {
 
         const token = req.params.token
 
-        const decoded = jwt.verify(token, process.env.OTHER_SECRET!) as MyPayload;
-        const { id } = decoded;
+      const {rows:userdata} = await pool.query(`SELECT * FROM "user" WHERE "Token" = $1`,[token])
+
+      if(userdata.length<=0){
+        throw new Error('No User Found')
+      }
+
+      const id = userdata[0].id
+
+
 
         const { rows: ProjectRows } = await pool.query(`SELECT * FROM "project" WHERE "uid" = $1`, [id])
 

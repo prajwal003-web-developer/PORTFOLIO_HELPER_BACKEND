@@ -26,7 +26,7 @@ app.use(fileUpload({ useTempFiles: true, tempFileDir: './tmp/' }));
 app.use((req, res, next) => {
    
         cors({
-            origin: ['http://localhost:3000',"https://portfolio-helper.vercel.app/","https://portfolio-helper.vercel.app/"], // Your frontend URL
+            origin: ['http://localhost:3000',"https://portfolio-helper.vercel.app","https://portfolio-helper.vercel.app"], // Your frontend URL
             methods: ['GET', 'POST', 'PUT', 'DELETE'],
             allowedHeaders: ['Content-Type', 'Authorization']
         })(req, res, next)

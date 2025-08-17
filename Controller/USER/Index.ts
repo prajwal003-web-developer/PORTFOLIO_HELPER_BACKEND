@@ -86,7 +86,13 @@ export const Login = async (req: Request, res: Response) => {
         return res.status(200).json({
             message: "Login succesful",
             Token: token,
-            data: user
+            data: {
+                Name:user.Name ,
+                Email:user.Email,
+                isVerified:user.IsVerified,
+                Token:user.Token,
+                id:user.id
+            }
         })
 
 

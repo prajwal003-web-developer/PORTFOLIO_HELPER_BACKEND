@@ -33,11 +33,11 @@ export const register = async (req: Request, res: Response) => {
 
         const hashed = await bcrypt.hash(Password, 10)
 
-        const TokenForVisiting = jwt.sign({ Email}, process.env.OTHER_SECRET! )
+        const TokenForVisiting = jwt.sign({ Email }, process.env.OTHER_SECRET!)
 
         const newInsertQuery = `insert INTO "user" ("Name","Email","Password","Pin" ,"Token") VALUES ($1,$2 ,$3,$4,$5) RETURNING id ,"Name" , "Email" , "IsVerified"`
 
-        const insertUser = await pool.query(newInsertQuery, [Name, Email, hashed, pin,TokenForVisiting])
+        const insertUser = await pool.query(newInsertQuery, [Name, Email, hashed, pin, TokenForVisiting])
 
         const newUser = insertUser.rows[0].id
 
@@ -49,7 +49,7 @@ export const register = async (req: Request, res: Response) => {
 
         return res.status(200).json({
             Token: token,
-            user:insertUser.rows[0]
+            user: insertUser.rows[0]
         })
     } catch (error) {
         ThrowError(res, error)
@@ -87,11 +87,11 @@ export const Login = async (req: Request, res: Response) => {
             message: "Login succesful",
             Token: token,
             data: {
-                Name:user.Name ,
-                Email:user.Email,
-                isVerified:user.IsVerified,
-                Token:user.Token,
-                id:user.id
+                Name: user.Name,
+                Email: user.Email,
+                isVerified: user.IsVerified,
+                Token: user.Token,
+                id: user.id
             }
         })
 
@@ -129,7 +129,7 @@ export const verifyEmailRequest = async (req: Request, res: Response) => {
         });
 
 
-        const frontendUrl = process.env.FRONTEND_URL || "http://localhost:3000";
+        const frontendUrl = process.env.FRONTEND_URL || "https://portfolio-helper.vercel.app";
         const verifyLink = `${frontendUrl}/verify-email?token=${token}`;
 
         const html = `
@@ -143,7 +143,7 @@ export const verifyEmailRequest = async (req: Request, res: Response) => {
       </a>
       <p>If the button doesn’t work, copy and paste this link into your browser:</p>
       <p>${verifyLink}</p>
-      <p>Cheers,<br/>Your Company</p>
+      <p>Cheers,<br/>PortFolio Helper</p>
     </div>
   `;
 
@@ -219,6 +219,110 @@ export const verify = async (req: Request, res: Response) => {
 
         const query = `UPDATE "user" SET "IsVerified" = $1 WHERE "id" = $2 RETURNING *;`;
         const values = [true, id];
+
+        const result = await pool.query(query, values);
+
+        if (result.rowCount === 0) {
+            throw new Error('Cant verify')
+        }
+
+        return res.status(200).json({
+            message: "verified"
+        })
+
+    } catch (error) {
+        ThrowError(res, error)
+    }
+}
+
+export const ForgotPasswordRequest = async (req: Request, res: Response) => {
+    try {
+
+        const { email } = req.params
+
+        const { rows: dataOfuser } = await pool.query(`SELECT * FROM "user" WHERE "Email" = $1`, [email])
+
+        const id = dataOfuser[0].id
+
+        const user = dataOfuser[0]
+
+        const token = jwt.sign({ userId: id }, process.env.EMAIL_SECRET!, { expiresIn: '20min' })
+
+        const transporter = nodemailer.createTransport({
+            service: "gmail",
+            auth: {
+                user: process.env.EMAIL,
+                pass: process.env.PASS,
+            },
+        });
+
+
+        const frontendUrl = process.env.FRONTEND_URL || "https://portfolio-helper.vercel.app";
+        const verifyLink = `${frontendUrl}/forget/${token}`;
+
+        const html = `
+    <div style="font-family: Arial, sans-serif; line-height: 1.6; max-width: 600px; margin: auto;">
+      <h2>Password Forgot</h2>
+      <p>Hi,</p>
+      <p>Thanks for Trying To Connect Again , Change Password by clicking the button below:</p>
+      <a href="${verifyLink}" 
+         style="display:inline-block; padding:10px 20px; margin:20px 0; background-color:#007bff; color:#fff; text-decoration:none; border-radius:5px;">
+         Verify Email
+      </a>
+      <p>If the button doesn’t work, copy and paste this link into your browser:</p>
+      <p>${verifyLink}</p>
+      <p>Cheers,<br/>Porttfolio Helper</p>
+    </div>
+  `;
+
+        await transporter.sendMail({
+            from: process.env.EMAIL_USER,
+            to: user.Email,
+            subject: "Connect & Change Your Key",
+            html,
+        })
+
+
+
+        return res.status(200).json({
+            message: "Email Sent Succesfully"
+        })
+
+
+
+    } catch (error) {
+        ThrowError(res, Error)
+    }
+}
+
+
+
+export const ChangePassword = async (req: Request, res: Response) => {
+    try {
+
+
+        const { Token } = req.params
+
+        const {password} = req.body
+
+        const queryToGetUser = `select * from "user" where "id" = $1`
+
+        const payload = jwt.verify(Token, process.env.EMAIL_SECRET!) as { userId: number }
+
+        const id = payload.userId
+
+        const { rows } = await pool.query(queryToGetUser, [id])
+
+        if (rows.length == 0) {
+            throw new Error("User is Not available")
+        }
+
+        const user: userData = rows[0]
+
+        const hashed = await bcrypt.hash(password ,10)
+
+        const query = `UPDATE "user" SET "Password" = $1 WHERE "id" = $2 RETURNING *;`;
+        const values = [hashed, id];
 
         const result = await pool.query(query, values);
 

@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { Login, me, register, verify, verifyEmailRequest } from "../Controller/USER/Index";
+import { ChangePassword, ForgotPasswordRequest, Login, me, register, verify, verifyEmailRequest } from "../Controller/USER/Index";
 import { AuthorizeUser } from "../Middleware/Middleware";
 
 
@@ -16,6 +16,9 @@ router.get("/verify-email-request",AuthorizeUser, verifyEmailRequest);
 
 router.post("/verify-email",verify)
 
-router.get('/me',AuthorizeUser,me)
+router.get('/me',AuthorizeUser,me) 
+
+router.get('/send-email-forget-password/:email',ForgotPasswordRequest)
+router.post('/verify-email-request/:Token',ChangePassword)
 
 export default router;
